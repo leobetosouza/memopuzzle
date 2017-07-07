@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Memo Puzzle</title>
+	<style>
+		body {
+			text-align: center;
+		}
+		#playarea {
+			width: 200px;
+			margin: 0 auto;
+			text-align: center;
+			border: 2px solid #000;
+			overflow:hidden;
+		}
+		#playarea .card {
+			box-sizing: border-box;
+			display: block;
+			float:left;
+			width: 50px;
+			height: 50px;
+			border: 2px solid #000;
+			transition: background-color 600ms ease-in;
+			transition: border-color 600ms ease-in;
+		}
+		#playarea .selected {
+			border-color: #000;
+			transition: none;
+		}
+		#playarea .matched {
+			box-shadow: inset 0 0 0 1px #fff;
+		}
+		.blink-it{
+			animation: blinker 1s linear infinite;
+		}
+		@keyframes blinker {
+			50% { opacity: 0 }
+		}
+	</style>
+</head>
+<body>
+	<button onclick="init()">Reset!</button>
+	<div id="playarea"></div>
+	<script>
+		const playarea = document.getElementById('playarea')
+		const items = '#f00 #033 #0f0 #03f #f00 #660 #660 #ff0 #606 #f0f #f60 #033 #f0f #366 #0f0 #606 #03f #f60 #ff0 #366'
+		const atual = []
+		const neutralColor = '#666'
+
+		playarea.addEventListener('click', evt => {
+
+			const target = evt.target
+			if (target.classList.contains('card') && !target.classList.contains('selected'))
+				play(target)
+
+		})
+
+		window.addEventListener('load', init)
+
+		function init () {
+			atual.length = 0;
+
+			playarea.innerHTML = items
+				.split(' ')
+				.sort(_ => .5 - Math.random())
+				.map(code => `<div class="card" data-code="${code}" style="background-color:${code}"></div>`)
+				.join('')
+
+			playarea.classList.add('blink-it')
+
+			setTimeout(_ => {
+
+				Array.from(playarea.querySelectorAll('.card'))
+					.forEach(card => card.style.backgroundColor = neutralColor)
+
+				playarea.classList.remove('blink-it')
+
+			}, 3000)
+		}
+
+		function play (target) {
+
+			target.classList.add('selected')
+			target.style.backgroundColor = target.dataset.code
+
+			setTimeout(_ => {
+
+				if (!atual.length) {
+					atual.push(target)
+					return
+				}
+
+				let prev = atual.pop()
+
+				if (target.dataset.code === prev.dataset.code) {
+					target.classList.add('matched')
+					prev.classList.add('matched')
+					return
+				}
+
+				target.classList.remove('selected')
+				target.style.backgroundColor = prev.style.backgroundColor = '#666'
+				prev.classList.remove('selected')
+
+			}, 600)
+
+		}
+
+	</script>
+</body>
+</html>
